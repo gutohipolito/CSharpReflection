@@ -1,6 +1,7 @@
 ﻿using System;
 using HumanResource;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 // #2 Referência | Reference
 using System.Reflection;
@@ -97,6 +98,9 @@ namespace ConsoleApp
             // #10 Usando DataAnnotations | Using DataAnnotations
             WithDataAnnotations();
 
+            // #11 Filtrando por atributos | Attributes filter
+            WithSpecificAttributes();
+
             Console.ReadLine();
         }
 
@@ -131,6 +135,48 @@ namespace ConsoleApp
             if (maxLengthAttribute != null)
                 Console.WriteLine(nameProperty.Name + " (MaxLength): " + maxLengthAttribute.FormatErrorMessage(nameProperty.Name));
 
+            Console.WriteLine("\n");
+        }
+
+        public static void WithSpecificAttributes()
+        {
+            var customerType = Type.GetType("HumanResource.Customer,CSharpReflection");
+
+            // Campos obrigatórios | Required fields
+            var isRequired = customerType
+                                .GetProperties()
+                                .Where(x => Attribute.IsDefined(x, typeof(RequiredAttribute)));
+
+            Console.WriteLine("Required");
+            foreach (var prop in isRequired)
+            {
+                Console.WriteLine("Property: " + prop.Name);
+            }
+            Console.WriteLine("\n");
+
+            // Chaves primárias | Primary Keys
+            var keys = customerType
+                            .GetProperties()
+                            .Where(x => Attribute.IsDefined(x, typeof(KeyAttribute)));
+
+            Console.WriteLine("Keys");
+            foreach (var prop in keys)
+            {
+                Console.WriteLine("Property: " + prop.Name);
+            }
+            Console.WriteLine("\n");
+
+            // Campos obrigatórios com display name | Required fields with display names
+            var requiredsWithDisplay = customerType
+                                        .GetProperties()
+                                        .Where(x => Attribute.IsDefined(x, typeof(RequiredAttribute)) &&
+                                                    Attribute.IsDefined(x, typeof(DisplayAttribute)));
+
+            Console.WriteLine("Requireds With Display");
+            foreach (var prop in requiredsWithDisplay)
+            {
+                Console.WriteLine("Property: " + prop.Name + ", Display: " + prop.GetCustomAttribute<DisplayAttribute>().Name);
+            }
             Console.WriteLine("\n");
         }
     }
